@@ -1,0 +1,89 @@
+{
+ "network": "portaldot-v3-testnet",
+ "taken_at_ms": 1793231778699,
+ "expected_chain": "PortaldotV3 Test",
+ "expected_evm_chain_id": 420420777,
+ "substrate": {
+  "url": "https://test-node-v3.portaldot.dev",
+  "ok": true,
+  "chain": "PortaldotV3 Test",
+  "latency_ms": 727.7957969999989,
+  "version": "3.0.0-dev-fddd43141f2",
+  "health": {
+   "peers": 0,
+   "isSyncing": false,
+   "shouldHavePeers": true
+  },
+  "sync": {
+   "startingBlock": 232115,
+   "currentBlock": 232115,
+   "highestBlock": 232115
+  },
+  "spec": {
+   "name": "portaldot-v3",
+   "version": 3002
+  },
+  "best": 232115,
+  "finalized": 232113,
+  "head_timestamp_ms": 1793191554000,
+  "validators": [
+   "5F4ZyJJ8R3QHZKRLAfDXdUuVE4w3Q7uq7tCNfAtvf2XEBfYY",
+   "5Grj5uKAoduL2EDfgizp2MMbURJKa4rL6Q5pGUnVhhhjhwjk"
+  ],
+  "babe_authorities": [
+   "5F4ZyJJ8R3QHZKRLAfDXdUuVE4w3Q7uq7tCNfAtvf2XEBfYY",
+   "5DtS7e9ZuweL82t5CwZMb1EYExiFLaJYZhg7n4HPWiNHqMnm"
+  ],
+  "grandpa_authorities": [
+   "5HGffAoWYwbx5xgJcx5x8WHftMFg245AzkTmigNH5HGWFU5z",
+   "5EeAtaKQXStRXTZ5uULgQB3bvZ7uaTWAWdZDfG1tdwd8fMNT"
+  ],
+  "session_index": 388,
+  "grandpa_set_id": 64,
+  "active_era": 64,
+  "staking_validator_count_target": 2,
+  "grandpa_round": {
+   "setId": 64,
+   "best": {
+    "round": 22335,
+    "totalWeight": 2,
+    "thresholdWeight": 2,
+    "prevotes": {
+     "currentWeight": 1,
+     "missing": [
+      "5EeAtaKQXStRXTZ5uULgQB3bvZ7uaTWAWdZDfG1tdwd8fMNT"
+     ]
+    },
+    "precommits": {
+     "currentWeight": 0,
+     "missing": [
+      "5EeAtaKQXStRXTZ5uULgQB3bvZ7uaTWAWdZDfG1tdwd8fMNT",
+      "5HGffAoWYwbx5xgJcx5x8WHftMFg245AzkTmigNH5HGWFU5z"
+     ]
+    }
+   },
+   "background": []
+  }
+ },
+ "evm": {
+  "url": "https://test-evm-rpc-v3.portaldot.dev",
+  "ok": true,
+  "latency_ms": 853.9263540005777,
+  "chain_id": 420420777,
+  "block_number": 232115,
+  "gas_price_wei": 27985,
+  "peer_count": 0
+ },
+ "explorer": {
+  "url": "https://scanner-testnet-v3-api.portaldot.dev",
+  "ok": true,
+  "latency_ms": 689.7348999991664,
+  "status": {
+   "block": 232113,
+   "runtime": 232113,
+   "assets": 232113,
+   "account": 232113
+  },
+  "indexed_block": 232113
+ }
+}
