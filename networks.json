@@ -1,0 +1,16 @@
+{
+  "portaldot-v3-testnet": {
+    "substrate_rpc": "https://test-node-v3.portaldot.dev",
+    "evm_rpc": "https://test-evm-rpc-v3.portaldot.dev",
+    "explorer_api": "https://scanner-testnet-v3-api.portaldot.dev",
+    "expected_chain": "PortaldotV3 Test",
+    "expected_evm_chain_id": 420420777
+  },
+  "portaldot-v3-live": {
+    "substrate_rpc": "https://live-v3-node.portaldot.dev",
+    "evm_rpc": null,
+    "explorer_api": null,
+    "expected_chain": "PortaldotV3 Live",
+    "expected_evm_chain_id": null
+  }
+}

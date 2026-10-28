@@ -1,0 +1,344 @@
+[
+  {
+    "snapshot": {
+      "network": "portaldot-v3-testnet",
+      "taken_at_ms": 1793231778699,
+      "expected_chain": "PortaldotV3 Test",
+      "expected_evm_chain_id": 420420777,
+      "substrate": {
+        "url": "https://test-node-v3.portaldot.dev",
+        "ok": true,
+        "chain": "PortaldotV3 Test",
+        "latency_ms": 727.7957969999989,
+        "version": "3.0.0-dev-fddd43141f2",
+        "health": {
+          "peers": 0,
+          "isSyncing": false,
+          "shouldHavePeers": true
+        },
+        "sync": {
+          "startingBlock": 232115,
+          "currentBlock": 232115,
+          "highestBlock": 232115
+        },
+        "spec": {
+          "name": "portaldot-v3",
+          "version": 3002
+        },
+        "best": 232115,
+        "finalized": 232113,
+        "head_timestamp_ms": 1793191554000,
+        "validators": [
+          "5F4ZyJJ8R3QHZKRLAfDXdUuVE4w3Q7uq7tCNfAtvf2XEBfYY",
+          "5Grj5uKAoduL2EDfgizp2MMbURJKa4rL6Q5pGUnVhhhjhwjk"
+        ],
+        "babe_authorities": [
+          "5F4ZyJJ8R3QHZKRLAfDXdUuVE4w3Q7uq7tCNfAtvf2XEBfYY",
+          "5DtS7e9ZuweL82t5CwZMb1EYExiFLaJYZhg7n4HPWiNHqMnm"
+        ],
+        "grandpa_authorities": [
+          "5HGffAoWYwbx5xgJcx5x8WHftMFg245AzkTmigNH5HGWFU5z",
+          "5EeAtaKQXStRXTZ5uULgQB3bvZ7uaTWAWdZDfG1tdwd8fMNT"
+        ],
+        "session_index": 388,
+        "grandpa_set_id": 64,
+        "active_era": 64,
+        "staking_validator_count_target": 2,
+        "grandpa_round": {
+          "setId": 64,
+          "best": {
+            "round": 22335,
+            "totalWeight": 2,
+            "thresholdWeight": 2,
+            "prevotes": {
+              "currentWeight": 1,
+              "missing": [
+                "5EeAtaKQXStRXTZ5uULgQB3bvZ7uaTWAWdZDfG1tdwd8fMNT"
+              ]
+            },
+            "precommits": {
+              "currentWeight": 0,
+              "missing": [
+                "5EeAtaKQXStRXTZ5uULgQB3bvZ7uaTWAWdZDfG1tdwd8fMNT",
+                "5HGffAoWYwbx5xgJcx5x8WHftMFg245AzkTmigNH5HGWFU5z"
+              ]
+            }
+          },
+          "background": []
+        }
+      },
+      "evm": {
+        "url": "https://test-evm-rpc-v3.portaldot.dev",
+        "ok": true,
+        "latency_ms": 853.9263540005777,
+        "chain_id": 420420777,
+        "block_number": 232115,
+        "gas_price_wei": 27985,
+        "peer_count": 0
+      },
+      "explorer": {
+        "url": "https://scanner-testnet-v3-api.portaldot.dev",
+        "ok": true,
+        "latency_ms": 689.7348999991664,
+        "status": {
+          "block": 232113,
+          "runtime": 232113,
+          "assets": 232113,
+          "account": 232113
+        },
+        "indexed_block": 232113
+      }
+    },
+    "history": {
+      "blocks": 120,
+      "from_block": 231996,
+      "to_block": 232115,
+      "from_ms": 1793190840000,
+      "to_ms": 1793191554000,
+      "block_time_s": {
+        "mean": 6.0,
+        "median": 6.0,
+        "p95": 6.002,
+        "max": 6.003
+      },
+      "slots_spanned": 120,
+      "slots_missed": 0,
+      "slot_fill_rate": 1.0,
+      "slot_kinds": {
+        "primary": 32,
+        "secondary_plain": 88
+      },
+      "by_author": [
+        {
+          "authority_index": 0,
+          "authority": "5F4ZyJJ8R3QHZKRLAfDXdUuVE4w3Q7uq7tCNfAtvf2XEBfYY",
+          "blocks": 58,
+          "share": 0.4833
+        },
+        {
+          "authority_index": 1,
+          "authority": "5DtS7e9ZuweL82t5CwZMb1EYExiFLaJYZhg7n4HPWiNHqMnm",
+          "blocks": 62,
+          "share": 0.5167
+        }
+      ],
+      "longest_gap": {
+        "after_block": 232045,
+        "seconds": 6.003
+      }
+    },
+    "findings": [
+      {
+        "code": "HEAD_STALL",
+        "severity": "crit",
+        "message": "Best block #232115 is 11.17 h old (expected one block every ~6 s).",
+        "hint": "Block production has stopped, or this node no longer receives blocks. Compare with a second node."
+      },
+      {
+        "code": "RPC_ISOLATED",
+        "severity": "crit",
+        "message": "RPC node has 0 peers.",
+        "hint": "A public RPC node with no peers cannot see new blocks. Check bootnodes, firewall and the validators' p2p ports."
+      },
+      {
+        "code": "GRANDPA_ROUND_OPEN",
+        "severity": "info",
+        "message": "GRANDPA round 22335 still collecting precommits; finality is keeping up (lag 2).",
+        "hint": ""
+      },
+      {
+        "code": "SMALL_VALIDATOR_SET",
+        "severity": "warn",
+        "message": "2 active validator(s): GRANDPA tolerates 0 offline voter(s); any single outage halts finality.",
+        "hint": "Run at least 4 independent validators (tolerates 1 fault)."
+      },
+      {
+        "code": "EVM_RPC_ISOLATED",
+        "severity": "warn",
+        "message": "EVM RPC node reports 0 peers.",
+        "hint": ""
+      },
+      {
+        "code": "KEY_REUSE_ACROSS_NETWORKS",
+        "severity": "warn",
+        "message": "2 session validator account(s) are used on both portaldot-v3-testnet and portaldot-v3-live: 5F4ZyJJ8R3QHZKRLAfDXdUuVE4w3Q7uq7tCNfAtvf2XEBfYY, 5Grj5uKAoduL2EDfgizp2MMbURJKa4rL6Q5pGUnVhhhjhwjk",
+        "hint": "Use separate keys and hosts per network so a test-network incident or key leak cannot affect the other network. Rotate session keys with author_rotateKeys on the node."
+      },
+      {
+        "code": "KEY_REUSE_ACROSS_NETWORKS",
+        "severity": "warn",
+        "message": "1 BABE key(s) are used on both portaldot-v3-testnet and portaldot-v3-live: 5F4ZyJJ8R3QHZKRLAfDXdUuVE4w3Q7uq7tCNfAtvf2XEBfYY",
+        "hint": "Use separate keys and hosts per network so a test-network incident or key leak cannot affect the other network. Rotate session keys with author_rotateKeys on the node."
+      },
+      {
+        "code": "KEY_REUSE_ACROSS_NETWORKS",
+        "severity": "warn",
+        "message": "1 GRANDPA key(s) are used on both portaldot-v3-testnet and portaldot-v3-live: 5HGffAoWYwbx5xgJcx5x8WHftMFg245AzkTmigNH5HGWFU5z",
+        "hint": "Use separate keys and hosts per network so a test-network incident or key leak cannot affect the other network. Rotate session keys with author_rotateKeys on the node."
+      },
+      {
+        "code": "SESSION_KEY_EQUALS_ACCOUNT",
+        "severity": "info",
+        "message": "BABE session key equals the validator account for: 5F4ZyJJ8R3QHZKRLAfDXdUuVE4w3Q7uq7tCNfAtvf2XEBfYY",
+        "hint": "Session keys are usually separate from the stash/controller account so they can be rotated."
+      }
+    ],
+    "overall": "crit"
+  },
+  {
+    "snapshot": {
+      "network": "portaldot-v3-live",
+      "taken_at_ms": 1793231785683,
+      "expected_chain": "PortaldotV3 Live",
+      "expected_evm_chain_id": null,
+      "substrate": {
+        "url": "https://live-v3-node.portaldot.dev",
+        "ok": true,
+        "chain": "PortaldotV3 Live",
+        "latency_ms": 894.4559429946821,
+        "version": "3.0.0-dev-fddd43141f2",
+        "health": {
+          "peers": 1,
+          "isSyncing": false,
+          "shouldHavePeers": true
+        },
+        "sync": {
+          "startingBlock": 9804,
+          "currentBlock": 838617,
+          "highestBlock": 838617
+        },
+        "spec": {
+          "name": "portaldot-v3",
+          "version": 3001
+        },
+        "best": 838617,
+        "finalized": 838615,
+        "head_timestamp_ms": 1793231784000,
+        "validators": [
+          "5F4ZyJJ8R3QHZKRLAfDXdUuVE4w3Q7uq7tCNfAtvf2XEBfYY",
+          "5Grj5uKAoduL2EDfgizp2MMbURJKa4rL6Q5pGUnVhhhjhwjk"
+        ],
+        "babe_authorities": [
+          "5F4ZyJJ8R3QHZKRLAfDXdUuVE4w3Q7uq7tCNfAtvf2XEBfYY",
+          "5F9zqNL7fYiYsEpsmPi3JHXu8LoMioa3tnkWngaVZT57qzpZ"
+        ],
+        "grandpa_authorities": [
+          "5HGffAoWYwbx5xgJcx5x8WHftMFg245AzkTmigNH5HGWFU5z",
+          "5EiD9XtmsRsQNXgdMgZHrdJ3WEUMt98x9E7mq6iF3AxiQUCf"
+        ],
+        "session_index": 1399,
+        "grandpa_set_id": 233,
+        "active_era": 233,
+        "staking_validator_count_target": 4,
+        "grandpa_round": {
+          "setId": 233,
+          "best": {
+            "round": 13321,
+            "totalWeight": 2,
+            "thresholdWeight": 2,
+            "prevotes": {
+              "currentWeight": 0,
+              "missing": [
+                "5EiD9XtmsRsQNXgdMgZHrdJ3WEUMt98x9E7mq6iF3AxiQUCf",
+                "5HGffAoWYwbx5xgJcx5x8WHftMFg245AzkTmigNH5HGWFU5z"
+              ]
+            },
+            "precommits": {
+              "currentWeight": 0,
+              "missing": [
+                "5EiD9XtmsRsQNXgdMgZHrdJ3WEUMt98x9E7mq6iF3AxiQUCf",
+                "5HGffAoWYwbx5xgJcx5x8WHftMFg245AzkTmigNH5HGWFU5z"
+              ]
+            }
+          },
+          "background": []
+        }
+      },
+      "evm": null,
+      "explorer": null
+    },
+    "history": {
+      "blocks": 120,
+      "from_block": 838498,
+      "to_block": 838617,
+      "from_ms": 1793231070000,
+      "to_ms": 1793231784000,
+      "block_time_s": {
+        "mean": 6.0,
+        "median": 6.0,
+        "p95": 6.001,
+        "max": 6.001
+      },
+      "slots_spanned": 120,
+      "slots_missed": 0,
+      "slot_fill_rate": 1.0,
+      "slot_kinds": {
+        "secondary_plain": 96,
+        "primary": 24
+      },
+      "by_author": [
+        {
+          "authority_index": 0,
+          "authority": "5F4ZyJJ8R3QHZKRLAfDXdUuVE4w3Q7uq7tCNfAtvf2XEBfYY",
+          "blocks": 59,
+          "share": 0.4917
+        },
+        {
+          "authority_index": 1,
+          "authority": "5F9zqNL7fYiYsEpsmPi3JHXu8LoMioa3tnkWngaVZT57qzpZ",
+          "blocks": 61,
+          "share": 0.5083
+        }
+      ],
+      "longest_gap": {
+        "after_block": 838503,
+        "seconds": 6.001
+      }
+    },
+    "findings": [
+      {
+        "code": "LOW_PEERS",
+        "severity": "warn",
+        "message": "RPC node has only 1 peer(s).",
+        "hint": ""
+      },
+      {
+        "code": "GRANDPA_ROUND_OPEN",
+        "severity": "info",
+        "message": "GRANDPA round 13321 still collecting precommits; finality is keeping up (lag 2).",
+        "hint": ""
+      },
+      {
+        "code": "SMALL_VALIDATOR_SET",
+        "severity": "warn",
+        "message": "2 active validator(s): GRANDPA tolerates 0 offline voter(s); any single outage halts finality.",
+        "hint": "Run at least 4 independent validators (tolerates 1 fault)."
+      },
+      {
+        "code": "KEY_REUSE_ACROSS_NETWORKS",
+        "severity": "warn",
+        "message": "2 session validator account(s) are used on both portaldot-v3-testnet and portaldot-v3-live: 5F4ZyJJ8R3QHZKRLAfDXdUuVE4w3Q7uq7tCNfAtvf2XEBfYY, 5Grj5uKAoduL2EDfgizp2MMbURJKa4rL6Q5pGUnVhhhjhwjk",
+        "hint": "Use separate keys and hosts per network so a test-network incident or key leak cannot affect the other network. Rotate session keys with author_rotateKeys on the node."
+      },
+      {
+        "code": "KEY_REUSE_ACROSS_NETWORKS",
+        "severity": "warn",
+        "message": "1 BABE key(s) are used on both portaldot-v3-testnet and portaldot-v3-live: 5F4ZyJJ8R3QHZKRLAfDXdUuVE4w3Q7uq7tCNfAtvf2XEBfYY",
+        "hint": "Use separate keys and hosts per network so a test-network incident or key leak cannot affect the other network. Rotate session keys with author_rotateKeys on the node."
+      },
+      {
+        "code": "KEY_REUSE_ACROSS_NETWORKS",
+        "severity": "warn",
+        "message": "1 GRANDPA key(s) are used on both portaldot-v3-testnet and portaldot-v3-live: 5HGffAoWYwbx5xgJcx5x8WHftMFg245AzkTmigNH5HGWFU5z",
+        "hint": "Use separate keys and hosts per network so a test-network incident or key leak cannot affect the other network. Rotate session keys with author_rotateKeys on the node."
+      },
+      {
+        "code": "SESSION_KEY_EQUALS_ACCOUNT",
+        "severity": "info",
+        "message": "BABE session key equals the validator account for: 5F4ZyJJ8R3QHZKRLAfDXdUuVE4w3Q7uq7tCNfAtvf2XEBfYY",
+        "hint": "Session keys are usually separate from the stash/controller account so they can be rotated."
+      }
+    ],
+    "overall": "warn"
+  }
+]
