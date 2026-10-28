@@ -76,3 +76,18 @@ class HistoryTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class DigestTests(unittest.TestCase):
+    def test_cli_digest_matches_calldata_script(self):
+        import importlib.util
+        from potwatch.cli import canonical_digest
+        root = pathlib.Path(__file__).resolve().parent.parent
+        spec = importlib.util.spec_from_file_location("ac", root / "scripts" / "attest_calldata.py")
+        ac = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(ac)
+        rep = json.loads((root / "examples" / "2026-10-29" / "report.json").read_text())
+        for r in rep:
+            self.assertEqual(canonical_digest(r), "0x" + ac.network_digest(r))
+            cd = ac.calldata(r, "9c78943f")["calldata"]
+            self.assertEqual(len(cd), 2 + 8 + 6 * 64)

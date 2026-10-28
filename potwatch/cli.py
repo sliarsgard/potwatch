@@ -2,7 +2,7 @@
 
   python -m potwatch check  [--network NAME] [--history N] [--out DIR]
   python -m potwatch watch  [--network NAME] [--interval S] [--log FILE]
-  python -m potwatch digest --report FILE      (hash for the on-chain attestation, no signing)
+  python -m potwatch digest --report FILE      (per-network sha256 stored on-chain; no signing)
 """
 from __future__ import annotations
 
@@ -66,7 +66,9 @@ def main(argv: list[str] | None = None) -> int:
     th = Thresholds()
     if a.cmd == "digest":
         rep = json.loads(pathlib.Path(a.report).read_text())
-        print(canonical_digest(rep))
+        # one digest per network result; this is what HealthAttestation.attest() stores
+        for r in rep if isinstance(rep, list) else [rep]:
+            print(r["snapshot"]["network"], r["overall"], canonical_digest(r))
         return 0
 
     names = a.network or list(nets)
