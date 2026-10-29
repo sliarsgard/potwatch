@@ -2,3 +2,4 @@ __pycache__/
 *.pyc
 .venv/
 potwatch.jsonl
+contracts/node_modules

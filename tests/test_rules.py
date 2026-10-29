@@ -74,9 +74,6 @@ class HistoryTests(unittest.TestCase):
         self.assertEqual(h["block_time_s"]["median"], 6.0)
 
 
-if __name__ == "__main__":
-    unittest.main()
-
 
 class DigestTests(unittest.TestCase):
     def test_cli_digest_matches_calldata_script(self):
@@ -91,3 +88,7 @@ class DigestTests(unittest.TestCase):
             self.assertEqual(canonical_digest(r), "0x" + ac.network_digest(r))
             cd = ac.calldata(r, "9c78943f")["calldata"]
             self.assertEqual(len(cd), 2 + 8 + 6 * 64)
+
+
+if __name__ == "__main__":
+    unittest.main()

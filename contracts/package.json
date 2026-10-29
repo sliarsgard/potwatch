@@ -1,0 +1,12 @@
+{
+  "name": "potwatch-contracts",
+  "private": true,
+  "description": "Build and keyless test for HealthAttestation.sol",
+  "scripts": { "build": "node build.js", "test": "node test_contract.mjs" },
+  "devDependencies": {
+    "solc": "0.8.24",
+    "@ethereumjs/evm": "3.1.1",
+    "@ethereumjs/util": "9.1.0",
+    "@ethereumjs/common": "4.4.0"
+  }
+}

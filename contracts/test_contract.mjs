@@ -1,9 +1,9 @@
 // Keyless local test of HealthAttestation: runs the bytecode in an in-memory EVM via
 // @ethereumjs/evm runCall. No private keys, no signatures, no network.
-// Usage: NODE_PATH=... node contracts/test_contract.mjs  (needs @ethereumjs/evm, @ethereumjs/util)
+// Usage: cd contracts && npm install && npm test
 import { createRequire } from "module";
 import fs from "fs";
-const require = createRequire(process.env.NODE_PATH + "/");
+const require = createRequire(process.env.NODE_PATH ? process.env.NODE_PATH + "/" : import.meta.url);
 const { EVM } = require("@ethereumjs/evm");
 const { Address, hexToBytes, bytesToHex } = require("@ethereumjs/util");
 const { Common, Hardfork, Chain } = require("@ethereumjs/common");

@@ -1,6 +1,6 @@
 // Compile HealthAttestation.sol with solc-js. evmVersion "paris" avoids PUSH0,
 // which older Frontier-based EVMs may not support.
-// Usage: NODE_PATH=<dir with solc> node contracts/build.js
+// Usage: cd contracts && npm install && npm run build
 const fs = require("fs"), path = require("path"), solc = require("solc");
 const src = fs.readFileSync(path.join(__dirname, "HealthAttestation.sol"), "utf8");
 const input = { language: "Solidity", sources: { "HealthAttestation.sol": { content: src } },
