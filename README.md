@@ -6,6 +6,27 @@ potwatch is a read-only health checker for Portaldot V3. It connects to the publ
 
 It needs no keys to run. All RPC calls go through an allowlist of read-only methods (`potwatch/rpc.py`).
 
+## Status
+
+| | |
+|---|---|
+| Hacker House period | Oct 14 – Nov 6, 2026 (all code in this repo was written in this period) |
+| Health checker (`potwatch check` / `watch` / `digest`) | **done**, runs against the live public endpoints |
+| Rule engine + offline tests on captured V3 snapshots | **done** |
+| `HealthAttestation` contract (build + keyless EVM test) | **done** |
+| Deployment dry-run on the V3 testnet (`scripts/deployment.py preflight`) | **done**: the testnet node returns exactly the expected runtime code for the constructor |
+| Testnet deployment + first `attest` tx | **outstanding**: needs a funded testnet account, see [Testnet deployment](#testnet-deployment) |
+| Demo video (≤ 3 min) | **outstanding**: script in [`docs/demo-script.md`](docs/demo-script.md) |
+
+### Outstanding items / roadmap
+
+- Deploy `HealthAttestation` on the V3 testnet and publish the first attestation (steps below).
+- Record and link the demo video.
+- Scheduled attestations: a cron recipe that attests every N minutes from a dedicated reporter key.
+- Divergence check between an operator's own validator RPC and the public RPC (same height, same finalized hash).
+- Alert sinks (webhook, Discord) on state changes from `potwatch watch`.
+- A small read-only web page that lists attestations from the contract and re-verifies them against published reports.
+
 ## Why
 
 Portaldot V3 runs a Substrate chain (BABE + GRANDPA) with an EVM on top. When something breaks, the symptom a dApp developer sees ("my tx never confirms") is several layers away from the cause (a node with 0 peers, a GRANDPA voter offline, an explorer that stopped indexing). potwatch checks every layer in one command and maps the result to a short list of findings.
@@ -20,7 +41,48 @@ Portaldot V3 runs a Substrate chain (BABE + GRANDPA) with an EVM on top. When so
 
 The full output is in [`examples/2026-10-29/`](examples/2026-10-29/): `report.json`, a self-contained `report.html` with block-time charts, and `metrics.prom` for Prometheus. In the 120 blocks before the testnet stalled, block time was a steady 6.0 s and both authorities authored blocks (58 / 62). In other words, production stopped all at once, with no gradual degradation beforehand. That points to a network or host event rather than a slow validator.
 
+**Follow-up (2026-10-29):** the testnet resumed at 02:09:54 UTC with block #232116 after a 13 h 24 min halt, on the same chain (no reset). At 08:32 UTC potwatch reported it as WARN: producing blocks every 6.0 s (#235881, finality lag 2), still with 1 peer and 2 validators.
+
 > These are observations from public endpoints at one point in time, not a security audit. Key reuse across networks may be intentional for a test deployment. potwatch flags it because it couples the failure domains of the two networks.
+
+## Architecture
+
+```mermaid
+flowchart TB
+  subgraph NET["Portaldot V3 testnet (public endpoints)"]
+    S["Substrate RPC<br/>BABE · GRANDPA · Session · Staking"]
+    E["EVM RPC (pallet-revive eth-rpc)<br/>chain id 420420777"]
+    X["Explorer API<br/>indexer status"]
+    C[("HealthAttestation.sol<br/>on Portaldot EVM")]
+  end
+  subgraph PW["potwatch (read-only, no keys)"]
+    RPC["rpc.py<br/>read-only method allowlist"]
+    P["probe.py<br/>snapshot per layer"]
+    H["history.py<br/>last N headers + BABE pre-digest"]
+    R["rules.py<br/>findings, thresholds,<br/>cross-network checks"]
+    O["render.py<br/>text · report.html · metrics.prom · report.json"]
+    D["potwatch digest<br/>sha256 per network"]
+    A["attest_calldata.py<br/>unsigned calldata"]
+    V["deployment.py<br/>preflight dry-run · verify receipts"]
+  end
+  OP(["Operator wallet<br/>(MetaMask / cast) signs"])
+  S --> RPC
+  E --> RPC
+  X --> P
+  RPC --> P
+  RPC --> H
+  P --> R
+  H --> R
+  R --> O
+  O --> D --> A --> OP
+  OP -- "deploy + attest tx" --> C
+  C -. "eth_getCode · latest(network)" .-> V
+  E -. "eth_call dry-run · receipts" .-> V
+  V --> Rd["README deployment block<br/>deployments/*.json"]
+  Obs["Prometheus / cron / CI<br/>exit code 0·1·2"] --- O
+```
+
+Rendered: [`docs/architecture.svg`](docs/architecture.svg) · [`docs/architecture.png`](docs/architecture.png). Data flow, safety model and GRANDPA fault-tolerance notes: [`docs/architecture.md`](docs/architecture.md).
 
 ## Checks
 
@@ -91,15 +153,77 @@ python3 scripts/attest_calldata.py out/report.json --contract 0xYourDeployment
 
 Portaldot V3 testnet EVM: RPC `https://test-evm-rpc-v3.portaldot.dev`, chain id `420420777` (`0x190f1ca9`), token tPOT.
 
-**Testnet deployment:** _to be filled in after deployment: contract address, deploy tx hash, first `attest` tx hash._
+
+## Testnet deployment
+
+Portaldot V3's EVM layer is served by `pallet-revive` through an Ethereum JSON-RPC adapter (`web3_clientVersion` reports `eth-rpc`), so standard Ethereum tooling works.
+
+| | |
+|---|---|
+| EVM RPC | `https://test-evm-rpc-v3.portaldot.dev` |
+| Chain id | `420420777` (`0x190f1ca9`) |
+| Token | tPOT (14 decimals on Substrate, shown as 18 decimals over eth-rpc) |
+| Explorer | https://scanner-testnet-v3.portaldot.dev (Substrate explorer: EVM txs appear as `revive` extrinsics) |
+| Artifact | `contracts/build/HealthAttestation.json`, solc 0.8.24, evmVersion paris, optimizer 200, no constructor arguments |
+
+<!-- deployment:start -->
+| | |
+|---|---|
+| Contract | `<CONTRACT_ADDRESS — not deployed yet>` |
+| Deploy tx | `<DEPLOY_TX_HASH>` |
+| First `attest` tx | `<ATTEST_TX_HASH>` |
+| Explorer | `<EXPLORER_LINK>` |
+<!-- deployment:end -->
+
+The block above is filled in by `scripts/deployment.py verify --write`, which reads the receipts back from the chain. Do not edit it by hand.
+
+### How to deploy (with your own testnet account)
+
+potwatch never holds a key. Use a fresh account that only ever holds testnet tPOT.
+
+1. **Preflight (read-only).** Checks chain id and head freshness, dry-runs the constructor with `eth_call` and checks that the node returns the expected runtime code, and estimates the fee. With `--from` it also checks your balance.
+   ```bash
+   python3 scripts/deployment.py preflight --from 0xYourTestnetAddress   # prints READY / NOT READY
+   ```
+   On 2026-10-29 the dry-run returned the expected code. `eth_estimateGas` put the deploy at ≈ 7.5e15 gas × 27,7xx wei ≈ **209 tPOT upper bound** (revive folds the storage deposit into the gas figure), so fund the account with ≥ 250 tPOT.
+2. **Deploy the exact artifact.** With Foundry (the key goes into an encrypted keystore, not your shell history):
+   ```bash
+   export RPC=https://test-evm-rpc-v3.portaldot.dev
+   cast wallet import potwatch-testnet --interactive
+   cast send --rpc-url $RPC --account potwatch-testnet --create "$(jq -r .bytecode contracts/build/HealthAttestation.json)"
+   # if the node rejects the tx type, add --legacy
+   ```
+   Note `transactionHash` and `contractAddress` from the output.
+   *Alternative without a terminal key:* MetaMask (custom network with the values above) + Remix: paste `contracts/HealthAttestation.sol` as `HealthAttestation.sol`, compile with 0.8.24, EVM version paris, optimizer 200, then deploy with "Injected Provider". `verify` accepts code that only differs in the solc metadata hash.
+3. **First attestation.**
+   ```bash
+   python3 -m potwatch check --network portaldot-v3-testnet --history 120 --out examples/$(date +%F)/
+   python3 scripts/attest_calldata.py examples/$(date +%F)/report.json --contract 0xContract
+   cast send --rpc-url $RPC --account potwatch-testnet 0xContract <calldata from the line above>
+   ```
+   In Remix: "At Address" → `attest(digest, network_bytes32, best, finalized, taken_at, severity)` with the values printed by `attest_calldata.py` (severity: ok 0, info 1, warn 2, crit 3).
+4. **Record it from the chain.**
+   ```bash
+   python3 scripts/deployment.py verify --deploy-tx 0xDeployTx --attest-tx 0xAttestTx --write
+   ```
+   This checks both receipts, that the on-chain code matches the build, that `owner()` is the deployer and that `latest(network)` holds the attested digest. It then fills in the block above and writes `deployments/portaldot-v3-testnet.json`.
+
+## Demo
+
+- **Video (≤ 3 min):** `<DEMO_VIDEO_URL — not recorded yet>`. Script: [`docs/demo-script.md`](docs/demo-script.md).
+- **Runnable demo:** local, no hosted service needed: see [Install and run](#install-and-run). `python3 -m potwatch check --out out/` against the public endpoints, then open `out/report.html`.
+- **Pitch deck:** [`docs/pitch/potwatch-pitch.pdf`](docs/pitch/potwatch-pitch.pdf).
 
 ## Tests
 
 ```bash
 python3 -m unittest discover -s tests -t .
+cd contracts && npm install && npm test
 ```
 
-The tests cover SCALE compact decoding, SS58 encoding (checked against the well-known Alice address), BABE pre-digest decoding of a real Portaldot header log, the rule engine on snapshots captured from the public endpoints, cross-network key-reuse detection, and agreement between `potwatch digest` and the calldata builder.
+The tests cover SCALE compact decoding, SS58 encoding (checked against the well-known Alice address), BABE pre-digest decoding of a real Portaldot header log, the rule engine on snapshots captured from the public endpoints, cross-network key-reuse detection, agreement between `potwatch digest` and the calldata builder, and the deployment verifier against a simulated chain (receipts, code match, owner, explorer links). The contract test runs `HealthAttestation` in an in-memory EVM: access control, stale-report rejection and `latest()` (14 checks).
+
+Not covered by automated tests: live endpoints (exercised by running `check`), and the deploy/attest transactions themselves, which `deployment.py verify` checks after the fact.
 
 ## Layout
 

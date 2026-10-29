@@ -41,7 +41,7 @@ def calldata(result: dict, selector: str) -> dict:
     d = network_digest(result)
     data = ("0x" + selector + d + b32(snap["network"]) + word(sub["best"]) + word(sub["finalized"])
             + word(snap["taken_at_ms"] // 1000) + word(SEVERITY[result["overall"]]))
-    return {"network": snap["network"], "digest": "0x" + d, "overall": result["overall"],
+    return {"network": snap["network"], "network_bytes32": "0x" + b32(snap["network"]), "digest": "0x" + d, "overall": result["overall"],
             "best": sub["best"], "finalized": sub["finalized"], "taken_at": snap["taken_at_ms"] // 1000,
             "calldata": data}
 

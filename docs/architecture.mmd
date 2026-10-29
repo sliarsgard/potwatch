@@ -1,0 +1,32 @@
+flowchart TB
+  subgraph NET["Portaldot V3 testnet (public endpoints)"]
+    S["Substrate RPC<br/>BABE · GRANDPA · Session · Staking"]
+    E["EVM RPC (pallet-revive eth-rpc)<br/>chain id 420420777"]
+    X["Explorer API<br/>indexer status"]
+    C[("HealthAttestation.sol<br/>on Portaldot EVM")]
+  end
+  subgraph PW["potwatch (read-only, no keys)"]
+    RPC["rpc.py<br/>read-only method allowlist"]
+    P["probe.py<br/>snapshot per layer"]
+    H["history.py<br/>last N headers + BABE pre-digest"]
+    R["rules.py<br/>findings, thresholds,<br/>cross-network checks"]
+    O["render.py<br/>text · report.html · metrics.prom · report.json"]
+    D["potwatch digest<br/>sha256 per network"]
+    A["attest_calldata.py<br/>unsigned calldata"]
+    V["deployment.py<br/>preflight dry-run · verify receipts"]
+  end
+  OP(["Operator wallet<br/>(MetaMask / cast) signs"])
+  S --> RPC
+  E --> RPC
+  X --> P
+  RPC --> P
+  RPC --> H
+  P --> R
+  H --> R
+  R --> O
+  O --> D --> A --> OP
+  OP -- "deploy + attest tx" --> C
+  C -. "eth_getCode · latest(network)" .-> V
+  E -. "eth_call dry-run · receipts" .-> V
+  V --> Rd["README deployment block<br/>deployments/*.json"]
+  Obs["Prometheus / cron / CI<br/>exit code 0·1·2"] --- O

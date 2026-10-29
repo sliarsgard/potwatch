@@ -12,6 +12,8 @@ READ_ONLY_METHODS = frozenset({
     "system_nodeRoles", "chain_getHeader", "chain_getFinalizedHead", "chain_getBlockHash",
     "state_getStorage", "state_getRuntimeVersion", "state_call", "grandpa_roundState",
     "eth_chainId", "eth_blockNumber", "eth_gasPrice", "net_peerCount", "eth_getBlockByNumber",
+    "eth_call", "eth_estimateGas", "eth_getCode", "eth_getBalance", "eth_getTransactionCount",
+    "eth_getTransactionReceipt", "eth_getTransactionByHash",
 })
 
 

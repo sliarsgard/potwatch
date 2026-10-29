@@ -1,26 +1,41 @@
 # potwatch architecture
 
 ```mermaid
-flowchart LR
-  subgraph Portaldot V3 network
-    S[Substrate RPC<br/>system_*, chain_*, state_getStorage,<br/>grandpa_roundState, state_call GrandpaApi]
-    E[EVM RPC<br/>eth_chainId, eth_blockNumber, net_peerCount]
-    X[Explorer API<br/>/status]
+flowchart TB
+  subgraph NET["Portaldot V3 testnet (public endpoints)"]
+    S["Substrate RPC<br/>BABE · GRANDPA · Session · Staking"]
+    E["EVM RPC (pallet-revive eth-rpc)<br/>chain id 420420777"]
+    X["Explorer API<br/>indexer status"]
+    C[("HealthAttestation.sol<br/>on Portaldot EVM")]
   end
-  S --> P[probe.py<br/>snapshot]
-  E --> P
+  subgraph PW["potwatch (read-only, no keys)"]
+    RPC["rpc.py<br/>read-only method allowlist"]
+    P["probe.py<br/>snapshot per layer"]
+    H["history.py<br/>last N headers + BABE pre-digest"]
+    R["rules.py<br/>findings, thresholds,<br/>cross-network checks"]
+    O["render.py<br/>text · report.html · metrics.prom · report.json"]
+    D["potwatch digest<br/>sha256 per network"]
+    A["attest_calldata.py<br/>unsigned calldata"]
+    V["deployment.py<br/>preflight dry-run · verify receipts"]
+  end
+  OP(["Operator wallet<br/>(MetaMask / cast) signs"])
+  S --> RPC
+  E --> RPC
   X --> P
-  S --> H[history.py<br/>last N headers, BABE pre-digest]
-  P --> R[rules.py<br/>findings + thresholds<br/>cross-network checks]
+  RPC --> P
+  RPC --> H
+  P --> R
   H --> R
-  R --> O1[text / exit code]
-  R --> O2[report.html]
-  R --> O3[metrics.prom]
-  R --> O4[report.json]
-  O4 --> D[potwatch digest<br/>sha256 per network]
-  D --> C[(HealthAttestation.sol<br/>Portaldot EVM)]
-  W[operator wallet<br/>signs attest tx] --> C
+  R --> O
+  O --> D --> A --> OP
+  OP -- "deploy + attest tx" --> C
+  C -. "eth_getCode · latest(network)" .-> V
+  E -. "eth_call dry-run · receipts" .-> V
+  V --> Rd["README deployment block<br/>deployments/*.json"]
+  Obs["Prometheus / cron / CI<br/>exit code 0·1·2"] --- O
 ```
+
+Rendered: [architecture.svg](architecture.svg) · [architecture.png](architecture.png) (source: `architecture.mmd`).
 
 ## Data flow
 
@@ -29,6 +44,7 @@ flowchart LR
 3. **Rules** (`rules.py`). These are pure functions from a snapshot and history to a list of `Finding(code, severity, message, hint)`. `compare_networks` runs across all snapshots to find keys shared between networks. Nothing in this module does I/O, so the tests run on captured JSON.
 4. **Render** (`render.py`). Outputs are a terminal summary, Prometheus textfile metrics, and one self-contained HTML page with inline SVG block-time charts (no JS and no CDN).
 5. **Attest**. `potwatch digest` hashes each network's result as canonical JSON (sorted keys, no whitespace) with sha256. `scripts/attest_calldata.py` builds unsigned calldata for `HealthAttestation.attest`, and the operator's own wallet signs and sends it. potwatch itself never holds a key.
+6. **Deploy check** (`scripts/deployment.py`). `preflight` dry-runs the constructor with `eth_call` and compares the returned runtime code with the build. `verify` reads the deploy and attest receipts back, checks code, owner and `latest(network)`, and records the address, hashes and explorer links.
 
 ## Safety
 
