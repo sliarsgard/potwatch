@@ -112,7 +112,7 @@ The thresholds live in `potwatch/rules.py` (`Thresholds`). The rules are pure fu
 Requires Python 3.10+ and `requests`.
 
 ```bash
-git clone <this repo> && cd potwatch
+git clone https://github.com/sliarsgard/potwatch.git && cd potwatch
 python3 -m pip install -r requirements.txt
 
 # one-shot check of every network in networks.json; exit code 0 ok, 1 warn, 2 crit
@@ -170,7 +170,7 @@ Only anvil's public, unlocked dev account 0 (`0xf39F…2266`) is used. Transacti
 # 1. tools: Python 3.10+, jq, Foundry (anvil + cast)
 curl -L https://foundry.paradigm.xyz | bash && ~/.foundry/bin/foundryup
 export PATH="$HOME/.foundry/bin:$PATH"
-git clone <this repo> && cd potwatch
+git clone https://github.com/sliarsgard/potwatch.git && cd potwatch
 python3 -m pip install -r requirements.txt
 
 # 2. local chain with the V3 testnet chain id (leave it running)
