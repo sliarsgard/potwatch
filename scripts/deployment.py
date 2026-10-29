@@ -7,6 +7,7 @@ records the contract address, tx hashes and explorer links.
 
     python3 scripts/deployment.py preflight [--from 0xYourAddress]
     python3 scripts/deployment.py verify --deploy-tx 0x... [--attest-tx 0x...] [--write]
+    python3 scripts/deployment.py --networks networks.local.json --network local-anvil preflight
 """
 from __future__ import annotations
 
@@ -28,8 +29,8 @@ OUT = ROOT / "deployments"
 START, END = "<!-- deployment:start -->", "<!-- deployment:end -->"
 
 
-def load(network: str) -> tuple[dict, dict]:
-    nets = json.loads((ROOT / "networks.json").read_text())
+def load(network: str, path: str | None = None) -> tuple[dict, dict]:
+    nets = json.loads((pathlib.Path(path) if path else ROOT / "networks.json").read_text())
     return nets[network], json.loads(ART.read_text())
 
 
@@ -99,6 +100,8 @@ def revive_extrinsic(items: list[dict], tx_index: int) -> dict | None:
 
 
 def explorer_links(cfg: dict, receipt: dict) -> dict:
+    if not cfg.get("explorer_ui"):
+        return {}
     height = int(receipt["blockNumber"], 16)
     links = {"block": f"{cfg['explorer_ui']}/blocks/{height}"}
     try:
@@ -130,7 +133,8 @@ def verify(network: str, cfg: dict, art: dict, deploy_tx: str, attest_tx: str | 
     code = rpc.call("eth_getCode", [addr, "latest"])[0]
     owner = "0x" + eth_call(rpc, addr, selector(art, "owner()"))[-40:]
     out = {
-        "network": network, "chain_id": cfg["expected_evm_chain_id"], "contract": addr,
+        "network": network, "label": cfg.get("label", "Portaldot V3 testnet"),
+        "chain_id": cfg["expected_evm_chain_id"], "evm_rpc": cfg["evm_rpc"], "contract": addr,
         "code_match": code_match(code, art["deployedBytecode"]),
         "owner": owner, "owner_is_deployer": owner.lower() == rec["from"].lower(),
         "compiler": art["compiler"], "evm_version": art["evmVersion"],
@@ -156,19 +160,22 @@ def markdown(d: dict) -> str:
     dep = d["deploy"]
     rows = [
         "| | |", "|---|---|",
-        f"| Network | Portaldot V3 testnet (EVM chain id `{d['chain_id']}`) |",
+        f"| Network | {d['label']} (EVM chain id `{d['chain_id']}`) |",
         f"| Contract | `{d['contract']}` |",
         f"| Deploy tx | `{dep['tx']}` (block #{dep['block']}) |",
     ]
     if "attest" in d:
         rows.append(f"| First `attest` tx | `{d['attest']['tx']}` (block #{d['attest']['block']}) |")
-    links = [f"[deploy block]({dep['links']['block']})"]
-    if "extrinsic" in dep["links"]:
-        links.append(f"[deploy extrinsic]({dep['links']['extrinsic']})")
-    if "attest" in d:
-        al = d["attest"]["links"]
-        links.append(f"[attest extrinsic]({al['extrinsic']})" if "extrinsic" in al else f"[attest block]({al['block']})")
-    rows.append(f"| Explorer | {' · '.join(links)} |")
+    if "block" in dep["links"]:
+        links = [f"[deploy block]({dep['links']['block']})"]
+        if "extrinsic" in dep["links"]:
+            links.append(f"[deploy extrinsic]({dep['links']['extrinsic']})")
+        if "attest" in d:
+            al = d["attest"]["links"]
+            links.append(f"[attest extrinsic]({al['extrinsic']})" if "extrinsic" in al else f"[attest block]({al['block']})")
+        rows.append(f"| Explorer | {' · '.join(links)} |")
+    else:
+        rows.append(f"| Explorer | none (local chain, RPC `{d['evm_rpc']}`) |")
     match = {"exact": "byte-for-byte", "same-except-metadata": "except the solc metadata hash"}[d["code_match"]]
     rows.append(f"| Build | {d['compiler']}, evmVersion {d['evm_version']}, optimizer 200 runs; on-chain code matches "
                 f"`contracts/build/HealthAttestation.json` {match} |")
@@ -185,6 +192,7 @@ def replace_block(text: str, body: str) -> str:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--network", default="portaldot-v3-testnet")
+    ap.add_argument("--networks", help="path to networks.json (default: the repo's)")
     sub = ap.add_subparsers(dest="cmd", required=True)
     p = sub.add_parser("preflight")
     p.add_argument("--from", dest="sender")
@@ -194,7 +202,7 @@ def main(argv: list[str] | None = None) -> int:
     v.add_argument("--write", nargs="*", metavar="FILE",
                    help="replace the deployment block in README.md (and any extra FILEs) and save deployments/<network>.json")
     a = ap.parse_args(argv)
-    cfg, art = load(a.network)
+    cfg, art = load(a.network, a.networks)
     if a.cmd == "preflight":
         return preflight(cfg, art, a.sender)
     d = verify(a.network, cfg, art, a.deploy_tx, a.attest_tx)

@@ -86,6 +86,19 @@ class VerifyDeployment(unittest.TestCase):
         self.assertIsNone(dep.revive_extrinsic(items, 7))
 
 
+class LocalNetwork(unittest.TestCase):
+    def test_local_network_without_explorer_records_rpc_instead_of_links(self):
+        cfg, _ = dep.load("local-anvil", ROOT / "networks.local.json")
+        self.assertEqual(cfg["expected_evm_chain_id"], CFG["expected_evm_chain_id"])
+        p1, p2 = fake_chain()
+        with p1, p2:
+            d = dep.verify("local-anvil", cfg, ART, DEPLOY_TX, ATTEST_TX)
+        self.assertEqual(d["deploy"]["links"], {})
+        md = dep.markdown(d)
+        self.assertIn("not the public V3 testnet", md)
+        self.assertIn("| Explorer | none (local chain, RPC `http://127.0.0.1:8545`) |", md)
+
+
 class ReplaceBlock(unittest.TestCase):
     def test_replaces_only_marked_block(self):
         text = f"a\n{dep.START}\nTODO\n{dep.END}\nb"

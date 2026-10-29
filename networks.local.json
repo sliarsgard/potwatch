@@ -1,0 +1,11 @@
+{
+  "local-anvil": {
+    "label": "Local anvil devnet, not the public V3 testnet",
+    "substrate_rpc": null,
+    "evm_rpc": "http://127.0.0.1:8545",
+    "explorer_api": null,
+    "expected_chain": null,
+    "expected_evm_chain_id": 420420777,
+    "explorer_ui": null
+  }
+}

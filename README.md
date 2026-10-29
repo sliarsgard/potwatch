@@ -15,12 +15,14 @@ It needs no keys to run. All RPC calls go through an allowlist of read-only meth
 | Rule engine + offline tests on captured V3 snapshots | **done** |
 | `HealthAttestation` contract (build + keyless EVM test) | **done** |
 | Deployment dry-run on the V3 testnet (`scripts/deployment.py preflight`) | **done**: the testnet node returns exactly the expected runtime code for the constructor |
-| Testnet deployment + first `attest` tx | **outstanding**: needs a funded testnet account, see [Testnet deployment](#testnet-deployment) |
+| Deploy + first `attest` tx on a **local** chain (anvil, chain id 420420777) | **done**, reproducible with one script: see [Local deployment demo](#local-deployment-demo) |
+| Deployment on the public V3 testnet | **outstanding**: needs tPOT, which is only handed out through a manual faucet request in Portaldot's Discord; see [Testnet deployment](#testnet-deployment) |
+| Terminal demo of the local deployment | **done**: [`demo/local-demo.cast`](demo/local-demo.cast) (asciinema), [`.gif`](demo/local-demo.gif), [`.mp4`](demo/local-demo.mp4) |
 | Demo video (≤ 3 min) | **outstanding**: script in [`docs/demo-script.md`](docs/demo-script.md) |
 
 ### Outstanding items / roadmap
 
-- Deploy `HealthAttestation` on the V3 testnet and publish the first attestation (steps below).
+- Deploy `HealthAttestation` on the public V3 testnet and publish the first attestation there (steps below; the same flow already runs end to end on a local chain).
 - Record and link the demo video.
 - Scheduled attestations: a cron recipe that attests every N minutes from a dedicated reporter key.
 - Divergence check between an operator's own validator RPC and the public RPC (same height, same finalized hash).
@@ -154,6 +156,67 @@ python3 scripts/attest_calldata.py out/report.json --contract 0xYourDeployment
 Portaldot V3 testnet EVM: RPC `https://test-evm-rpc-v3.portaldot.dev`, chain id `420420777` (`0x190f1ca9`), token tPOT.
 
 
+## Local deployment demo
+
+**Why local:** the V3 testnet halted on 2026-10-28 at block #232115 (last block 12:45:54 UTC) and only resumed 13 h 24 min later. Deploying there also needs tPOT, and the only source we found is a manual faucet request in Portaldot's Discord; there is no public faucet page. So the end-to-end deploy and attest runs on a local chain. We also tried Portaldot's own local node (`portaldot_dev` from [portaldotVolunteer/Portaldot-node](https://github.com/portaldotVolunteer/Portaldot-node), v2.0.0). It has `pallet-contracts` but no `pallet-revive` and no Ethereum RPC, so it cannot run this Solidity contract. That is why the demo uses [anvil](https://book.getfoundry.sh/anvil/) with the V3 testnet's chain id `420420777`.
+
+What it shows: the exact committed artifact is deployed, a fresh potwatch report of the **real** public V3 testnet is attested on-chain, and `deployment.py verify --write` reads everything back from the receipts. The bytecode itself has been dry-run against the real V3 testnet (`preflight` without `--networks`: the node returns exactly the expected runtime code). Limits: anvil is a standard EVM, not `pallet-revive`. Fees there are not representative (≈ 0.001 ETH locally vs ≈ 209 tPOT upper bound on the testnet), and the contract has no explorer page.
+
+Only anvil's public, unlocked dev account 0 (`0xf39F…2266`) is used. Transactions go through `eth_sendTransaction` on anvil, so no private key appears anywhere. `scripts/local_demo.sh` refuses any RPC that is not `127.0.0.1`/`localhost`.
+
+### Reproduce (Linux/macOS)
+
+```bash
+# 1. tools: Python 3.10+, jq, Foundry (anvil + cast)
+curl -L https://foundry.paradigm.xyz | bash && ~/.foundry/bin/foundryup
+export PATH="$HOME/.foundry/bin:$PATH"
+git clone <this repo> && cd potwatch
+python3 -m pip install -r requirements.txt
+
+# 2. local chain with the V3 testnet chain id (leave it running)
+anvil --chain-id 420420777 --block-time 2 > anvil.log &
+
+# 3. everything in one go: preflight, deploy, potwatch check (read-only, public testnet), attest, verify --write
+./scripts/local_demo.sh
+```
+
+The individual steps, the same ones the script runs:
+
+```bash
+RPC=http://127.0.0.1:8545
+FROM=0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266   # anvil dev account 0 (unlocked)
+python3 scripts/deployment.py --networks networks.local.json --network local-anvil preflight --from $FROM
+DEPLOY_TX=$(cast send --rpc-url $RPC --unlocked --from $FROM --json \
+  --create "$(jq -r .bytecode contracts/build/HealthAttestation.json)" | jq -r .transactionHash)
+CONTRACT=$(cast receipt --rpc-url $RPC $DEPLOY_TX contractAddress)
+python3 -m potwatch check --network portaldot-v3-testnet --history 120 --out out/   # exit 1 = WARN, still fine
+CALLDATA=$(python3 scripts/attest_calldata.py out/report.json --contract $CONTRACT | jq -r '.[0].calldata')
+ATTEST_TX=$(cast send --rpc-url $RPC --unlocked --from $FROM --json $CONTRACT $CALLDATA | jq -r .transactionHash)
+python3 scripts/deployment.py --networks networks.local.json --network local-anvil verify \
+  --deploy-tx $DEPLOY_TX --attest-tx $ATTEST_TX --write
+```
+
+On a fresh anvil the contract address is always `0x5FbDB2315678afecb367f032d93F642f64180aa3` (account 0, nonce 0). The tx hashes change from run to run because the attested report has a new timestamp.
+
+### Result of the recorded run (2026-10-29)
+
+Filled in by `deployment.py verify --write` from the local chain's receipts (also saved as [`deployments/local-anvil.json`](deployments/local-anvil.json)). The attested report is in [`examples/2026-10-29-local-demo/`](examples/2026-10-29-local-demo/), and `python3 -m potwatch digest --report examples/2026-10-29-local-demo/report.json` prints the same digest that `latest("portaldot-v3-testnet")` returned on-chain (`0x31eb…f773`).
+
+<!-- deployment:start -->
+| | |
+|---|---|
+| Network | Local anvil devnet, not the public V3 testnet (EVM chain id `420420777`) |
+| Contract | `0x5fbdb2315678afecb367f032d93f642f64180aa3` |
+| Deploy tx | `0xe46640073a7441b61e8b9a361120c854a29aebb768cf64e8b27be88527ecec77` (block #3) |
+| First `attest` tx | `0xf63ea75caff7e2f854f712ef1ce787facb537e817f758752b2c59e8ee303af1a` (block #9) |
+| Explorer | none (local chain, RPC `http://127.0.0.1:8545`) |
+| Build | 0.8.24+commit.e11b9ed9.Emscripten.clang, evmVersion paris, optimizer 200 runs; on-chain code matches `contracts/build/HealthAttestation.json` byte-for-byte |
+<!-- deployment:end -->
+
+Terminal recording of this run: [`demo/local-demo.cast`](demo/local-demo.cast) (play with `asciinema play demo/local-demo.cast`), or as [GIF](demo/local-demo.gif) / [MP4](demo/local-demo.mp4).
+
+![local deployment demo](demo/local-demo.gif)
+
 ## Testnet deployment
 
 Portaldot V3's EVM layer is served by `pallet-revive` through an Ethereum JSON-RPC adapter (`web3_clientVersion` reports `eth-rpc`), so standard Ethereum tooling works.
@@ -166,16 +229,7 @@ Portaldot V3's EVM layer is served by `pallet-revive` through an Ethereum JSON-R
 | Explorer | https://scanner-testnet-v3.portaldot.dev (Substrate explorer: EVM txs appear as `revive` extrinsics) |
 | Artifact | `contracts/build/HealthAttestation.json`, solc 0.8.24, evmVersion paris, optimizer 200, no constructor arguments |
 
-<!-- deployment:start -->
-| | |
-|---|---|
-| Contract | `<CONTRACT_ADDRESS — not deployed yet>` |
-| Deploy tx | `<DEPLOY_TX_HASH>` |
-| First `attest` tx | `<ATTEST_TX_HASH>` |
-| Explorer | `<EXPLORER_LINK>` |
-<!-- deployment:end -->
-
-The block above is filled in by `scripts/deployment.py verify --write`, which reads the receipts back from the chain. Do not edit it by hand.
+After a testnet deploy, `scripts/deployment.py verify --write` (default network) replaces the deployment block under [Local deployment demo](#local-deployment-demo) with the testnet receipts. Do not edit that block by hand.
 
 ### How to deploy (with your own testnet account)
 
@@ -206,10 +260,11 @@ potwatch never holds a key. Use a fresh account that only ever holds testnet tPO
    ```bash
    python3 scripts/deployment.py verify --deploy-tx 0xDeployTx --attest-tx 0xAttestTx --write
    ```
-   This checks both receipts, that the on-chain code matches the build, that `owner()` is the deployer and that `latest(network)` holds the attested digest. It then fills in the block above and writes `deployments/portaldot-v3-testnet.json`.
+   This checks both receipts, that the on-chain code matches the build, that `owner()` is the deployer and that `latest(network)` holds the attested digest. It then fills in the deployment block (under [Local deployment demo](#local-deployment-demo)) and writes `deployments/portaldot-v3-testnet.json`.
 
 ## Demo
 
+- **Terminal demo (local deployment, ~20 s):** [`demo/local-demo.cast`](demo/local-demo.cast) · [GIF](demo/local-demo.gif) · [MP4](demo/local-demo.mp4). See [Local deployment demo](#local-deployment-demo).
 - **Video (≤ 3 min):** `<DEMO_VIDEO_URL — not recorded yet>`. Script: [`docs/demo-script.md`](docs/demo-script.md).
 - **Runnable demo:** local, no hosted service needed: see [Install and run](#install-and-run). `python3 -m potwatch check --out out/` against the public endpoints, then open `out/report.html`.
 - **Pitch deck:** [`docs/pitch/potwatch-pitch.pdf`](docs/pitch/potwatch-pitch.pdf).
@@ -237,13 +292,17 @@ potwatch/history.py  last-N-block statistics: block time, slot fill, per-author 
 potwatch/rules.py    findings, thresholds and cross-network checks (pure functions)
 potwatch/render.py   text, Prometheus and self-contained HTML output
 contracts/           HealthAttestation.sol, build script, keyless EVM test
-scripts/             attest_calldata.py (unsigned calldata)
+scripts/             attest_calldata.py (unsigned calldata), deployment.py (preflight / verify),
+                     local_demo.sh (end-to-end demo on a local anvil chain)
+networks.local.json  local anvil chain for the deployment demo
+deployments/         receipts recorded by deployment.py verify --write
+demo/                terminal recording of the local deployment
 docs/architecture.md
 ```
 
 ## Disclosure
 
-- Dependencies: `requests` (Python). For contract build and test only: `solc` (solc-js), `@ethereumjs/evm`, `@ethereumjs/util`, `@ethereumjs/common`. Storage key prefixes follow the standard Substrate `twox128(pallet) ++ twox128(item)` scheme.
+- Dependencies: `requests` (Python). For contract build and test only: `solc` (solc-js), `@ethereumjs/evm`, `@ethereumjs/util`, `@ethereumjs/common`. For the local deployment demo: Foundry (`anvil`, `cast`) and `jq`; the recording was made with asciinema and agg. Storage key prefixes follow the standard Substrate `twox128(pallet) ++ twox128(item)` scheme.
 - This project was built with substantial help from an AI coding assistant, under the submitter's direction and review.
 
 ## License

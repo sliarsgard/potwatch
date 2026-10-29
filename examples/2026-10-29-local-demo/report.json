@@ -1,0 +1,156 @@
+[
+  {
+    "snapshot": {
+      "network": "portaldot-v3-testnet",
+      "taken_at_ms": 1793272481162,
+      "expected_chain": "PortaldotV3 Test",
+      "expected_evm_chain_id": 420420777,
+      "substrate": {
+        "url": "https://test-node-v3.portaldot.dev",
+        "ok": true,
+        "chain": "PortaldotV3 Test",
+        "latency_ms": 835.4500960003861,
+        "version": "3.0.0-dev-fddd43141f2",
+        "health": {
+          "peers": 1,
+          "isSyncing": false,
+          "shouldHavePeers": true
+        },
+        "sync": {
+          "startingBlock": 232115,
+          "currentBlock": 237489,
+          "highestBlock": 237489
+        },
+        "spec": {
+          "name": "portaldot-v3",
+          "version": 3002
+        },
+        "best": 237489,
+        "finalized": 237486,
+        "head_timestamp_ms": 1793272482000,
+        "validators": [
+          "5F4ZyJJ8R3QHZKRLAfDXdUuVE4w3Q7uq7tCNfAtvf2XEBfYY",
+          "5Grj5uKAoduL2EDfgizp2MMbURJKa4rL6Q5pGUnVhhhjhwjk"
+        ],
+        "babe_authorities": [
+          "5F4ZyJJ8R3QHZKRLAfDXdUuVE4w3Q7uq7tCNfAtvf2XEBfYY",
+          "5DtS7e9ZuweL82t5CwZMb1EYExiFLaJYZhg7n4HPWiNHqMnm"
+        ],
+        "grandpa_authorities": [
+          "5HGffAoWYwbx5xgJcx5x8WHftMFg245AzkTmigNH5HGWFU5z",
+          "5EeAtaKQXStRXTZ5uULgQB3bvZ7uaTWAWdZDfG1tdwd8fMNT"
+        ],
+        "session_index": 398,
+        "grandpa_set_id": 66,
+        "active_era": 66,
+        "staking_validator_count_target": 2,
+        "grandpa_round": {
+          "setId": 66,
+          "best": {
+            "round": 6313,
+            "totalWeight": 2,
+            "thresholdWeight": 2,
+            "prevotes": {
+              "currentWeight": 2,
+              "missing": []
+            },
+            "precommits": {
+              "currentWeight": 0,
+              "missing": [
+                "5EeAtaKQXStRXTZ5uULgQB3bvZ7uaTWAWdZDfG1tdwd8fMNT",
+                "5HGffAoWYwbx5xgJcx5x8WHftMFg245AzkTmigNH5HGWFU5z"
+              ]
+            }
+          },
+          "background": []
+        }
+      },
+      "evm": {
+        "url": "https://test-evm-rpc-v3.portaldot.dev",
+        "ok": true,
+        "latency_ms": 786.2209219993019,
+        "chain_id": 420420777,
+        "block_number": 237489,
+        "gas_price_wei": 27610,
+        "peer_count": 1
+      },
+      "explorer": {
+        "url": "https://scanner-testnet-v3-api.portaldot.dev",
+        "ok": true,
+        "latency_ms": 746.38174500069,
+        "status": {
+          "block": 237486,
+          "runtime": 237487,
+          "assets": 237486,
+          "account": 237487
+        },
+        "indexed_block": 237486
+      }
+    },
+    "history": {
+      "blocks": 120,
+      "from_block": 237370,
+      "to_block": 237489,
+      "from_ms": 1793271768000,
+      "to_ms": 1793272482000,
+      "block_time_s": {
+        "mean": 6.0,
+        "median": 6.0,
+        "p95": 6.002,
+        "max": 6.013
+      },
+      "slots_spanned": 120,
+      "slots_missed": 0,
+      "slot_fill_rate": 1.0,
+      "slot_kinds": {
+        "secondary_plain": 92,
+        "primary": 28
+      },
+      "by_author": [
+        {
+          "authority_index": 0,
+          "authority": "5F4ZyJJ8R3QHZKRLAfDXdUuVE4w3Q7uq7tCNfAtvf2XEBfYY",
+          "blocks": 70,
+          "share": 0.5833
+        },
+        {
+          "authority_index": 1,
+          "authority": "5DtS7e9ZuweL82t5CwZMb1EYExiFLaJYZhg7n4HPWiNHqMnm",
+          "blocks": 50,
+          "share": 0.4167
+        }
+      ],
+      "longest_gap": {
+        "after_block": 237422,
+        "seconds": 6.013
+      }
+    },
+    "findings": [
+      {
+        "code": "LOW_PEERS",
+        "severity": "warn",
+        "message": "RPC node has only 1 peer(s).",
+        "hint": ""
+      },
+      {
+        "code": "GRANDPA_ROUND_OPEN",
+        "severity": "info",
+        "message": "GRANDPA round 6313 still collecting precommits; finality is keeping up (lag 3).",
+        "hint": ""
+      },
+      {
+        "code": "SMALL_VALIDATOR_SET",
+        "severity": "warn",
+        "message": "2 active validator(s): GRANDPA tolerates 0 offline voter(s); any single outage halts finality.",
+        "hint": "Run at least 4 independent validators (tolerates 1 fault)."
+      },
+      {
+        "code": "SESSION_KEY_EQUALS_ACCOUNT",
+        "severity": "info",
+        "message": "BABE session key equals the validator account for: 5F4ZyJJ8R3QHZKRLAfDXdUuVE4w3Q7uq7tCNfAtvf2XEBfYY",
+        "hint": "Session keys are usually separate from the stash/controller account so they can be rotated."
+      }
+    ],
+    "overall": "warn"
+  }
+]

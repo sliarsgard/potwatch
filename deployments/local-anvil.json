@@ -1,0 +1,25 @@
+{
+ "network": "local-anvil",
+ "label": "Local anvil devnet, not the public V3 testnet",
+ "chain_id": 420420777,
+ "evm_rpc": "http://127.0.0.1:8545",
+ "contract": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+ "code_match": "exact",
+ "owner": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+ "owner_is_deployer": true,
+ "compiler": "0.8.24+commit.e11b9ed9.Emscripten.clang",
+ "evm_version": "paris",
+ "deploy": {
+  "tx": "0xe46640073a7441b61e8b9a361120c854a29aebb768cf64e8b27be88527ecec77",
+  "block": 3,
+  "links": {}
+ },
+ "count": 1,
+ "attest": {
+  "tx": "0xf63ea75caff7e2f854f712ef1ce787facb537e817f758752b2c59e8ee303af1a",
+  "block": 9,
+  "links": {},
+  "network": "portaldot-v3-testnet",
+  "latest_digest": "0x31eba4fa78292f73399dcd39212705a2588c97af7a7089eb75378bf35003f773"
+ }
+}

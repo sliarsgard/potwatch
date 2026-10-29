@@ -1,0 +1,38 @@
+# HELP potwatch_up 1 if the Substrate RPC answered.
+# TYPE potwatch_up gauge
+potwatch_up{network="portaldot-v3-testnet"} 1
+# HELP potwatch_status 0 ok, 1 warn, 2 crit.
+# TYPE potwatch_status gauge
+potwatch_status{network="portaldot-v3-testnet"} 1
+# HELP potwatch_best_block Best block number.
+# TYPE potwatch_best_block gauge
+potwatch_best_block{network="portaldot-v3-testnet"} 237489
+# HELP potwatch_finalized_block Finalized block number.
+# TYPE potwatch_finalized_block gauge
+potwatch_finalized_block{network="portaldot-v3-testnet"} 237486
+# HELP potwatch_finality_lag_blocks Best minus finalized.
+# TYPE potwatch_finality_lag_blocks gauge
+potwatch_finality_lag_blocks{network="portaldot-v3-testnet"} 3
+# HELP potwatch_head_age_seconds Seconds since the best block's timestamp.
+# TYPE potwatch_head_age_seconds gauge
+potwatch_head_age_seconds{network="portaldot-v3-testnet"} -0.8
+# HELP potwatch_peers Peers of the RPC node.
+# TYPE potwatch_peers gauge
+potwatch_peers{network="portaldot-v3-testnet"} 1
+# HELP potwatch_validators Active session validators.
+# TYPE potwatch_validators gauge
+potwatch_validators{network="portaldot-v3-testnet"} 2
+# HELP potwatch_rpc_latency_ms Latency of system_chain.
+# TYPE potwatch_rpc_latency_ms gauge
+potwatch_rpc_latency_ms{network="portaldot-v3-testnet"} 835.5
+# HELP potwatch_block_time_median_seconds Median block interval in the sampled window.
+# TYPE potwatch_block_time_median_seconds gauge
+potwatch_block_time_median_seconds{network="portaldot-v3-testnet"} 6.0
+# HELP potwatch_authored_blocks Blocks authored per BABE authority in the sampled window.
+# TYPE potwatch_authored_blocks gauge
+potwatch_authored_blocks{network="portaldot-v3-testnet",authority="5F4ZyJJ8R3QHZKRLAfDXdUuVE4w3Q7uq7tCNfAtvf2XEBfYY"} 70
+potwatch_authored_blocks{network="portaldot-v3-testnet",authority="5DtS7e9ZuweL82t5CwZMb1EYExiFLaJYZhg7n4HPWiNHqMnm"} 50
+potwatch_finding{network="portaldot-v3-testnet",code="LOW_PEERS",severity="warn"} 1
+potwatch_finding{network="portaldot-v3-testnet",code="GRANDPA_ROUND_OPEN",severity="info"} 1
+potwatch_finding{network="portaldot-v3-testnet",code="SMALL_VALIDATOR_SET",severity="warn"} 1
+potwatch_finding{network="portaldot-v3-testnet",code="SESSION_KEY_EQUALS_ACCOUNT",severity="info"} 1
