@@ -1,0 +1,73 @@
+<!doctype html><html><head><meta charset="utf-8"><title>potwatch – pitch</title>
+<style>
+@page{size:1280px 720px;margin:0}
+body{margin:0;font-family:"Noto Sans",Arial,sans-serif;color:#1f2328}
+.s{width:1280px;height:720px;box-sizing:border-box;padding:56px 72px;page-break-after:always;position:relative;overflow:hidden}
+h1{font-size:54px;margin:0 0 12px}h2{font-size:38px;margin:0 0 24px;color:#0969da}
+p,li{font-size:24px;line-height:1.45}li{margin:6px 0}
+.k{font-family:monospace;font-size:20px;background:#f6f8fa;padding:2px 6px;border-radius:4px}
+.crit{color:#cf222e;font-weight:700}.warn{color:#9a6700;font-weight:700}
+.foot{position:absolute;bottom:24px;right:72px;font-size:16px;color:#57606a}
+table{border-collapse:collapse;font-size:21px}td,th{border-bottom:1px solid #d0d7de;padding:8px 14px;text-align:left}
+.cols{display:flex;gap:40px}.cols>div{flex:1}
+img{max-height:520px;border:1px solid #d0d7de}
+</style></head><body>
+
+<div class="s" style="background:#0b1f3a;color:#fff">
+<h1 style="margin-top:160px">potwatch</h1>
+<p style="font-size:32px">Know when a Portaldot network is unhealthy, why it is unhealthy, and prove it on-chain.</p>
+<p style="color:#9fb3c8">Portaldot Hacker House 2026 · Node Operations &amp; Tooling</p>
+</div>
+
+<div class="s"><h2>The problem</h2>
+<ul>
+<li>A dApp developer sees "my transaction never confirms". The cause sits several layers down: a node with 0 peers, an offline GRANDPA voter, or a stalled indexer.</li>
+<li>Portaldot V3 has three layers to watch: Substrate (BABE + GRANDPA), the EVM, and the explorer.</li>
+<li>Today, checking them takes polkadot.js, an EVM wallet, the explorer, and knowledge of consensus internals.</li>
+<li>There is also no public, verifiable record of network uptime that builders and operators can point to.</li>
+</ul><div class="foot">potwatch</div></div>
+
+<div class="s"><h2>What potwatch does</h2>
+<div class="cols"><div><ul>
+<li>One command checks every layer: <span class="k">python -m potwatch check</span></li>
+<li>Decodes BABE slots and authors from block headers, plus GRANDPA rounds, validators and session keys</li>
+<li>23 finding types, each with a plain-language hint</li>
+<li>Output as text, HTML, Prometheus metrics, and an exit code for cron or CI</li>
+</ul></div><div><ul>
+<li>Read-only by construction: an RPC method allowlist, and no keys</li>
+<li>Cross-network check: flags keys reused between networks</li>
+<li><span class="k">watch</span> mode logs state changes</li>
+<li>Rules are pure functions, tested against real captured snapshots</li>
+</ul></div></div><div class="foot">potwatch</div></div>
+
+<div class="s"><h2>First real run: 2026-10-28, 23:56 UTC</h2>
+<table><tr><th>Network</th><th>Verdict</th><th>What potwatch found</th></tr>
+<tr><td>PortaldotV3 Test</td><td class="crit">CRIT</td><td>Head stuck at #232115 for 11.2 h; RPC and EVM nodes have 0 peers</td></tr>
+<tr><td>PortaldotV3 Live</td><td class="warn">WARN</td><td>1 peer; 2 validators (GRANDPA tolerates 0 faults)</td></tr>
+<tr><td>Both</td><td class="warn">WARN</td><td>The same 2 validator accounts, 1 BABE key and 1 GRANDPA key are active on both networks</td></tr></table>
+<p>Before the stall, the 120 blocks were perfectly regular (6.0 s median, 58/62 author split). Production stopped abruptly, with no slow decline. That points to a network or host event, not a failing validator.</p>
+<div class="foot">Observations from public endpoints at one point in time; not a security audit.</div></div>
+
+<div class="s"><h2>The report</h2><div style="text-align:center"><img src="report.png"></div><div class="foot">examples/2026-10-29/report.html</div></div>
+
+<div class="s"><h2>On-chain attestations on Portaldot EVM</h2>
+<ul>
+<li><span class="k">HealthAttestation.sol</span> is an append-only log of report digests (sha256 of canonical JSON) with network, best/finalized block, timestamp and severity</li>
+<li>Anyone can re-hash the published <span class="k">report.json</span> and compare it with <span class="k">latest(network)</span></li>
+<li>This gives a tamper-evident uptime history for networks and node operators, a building block for operator reputation and SLAs</li>
+<li>No funds held; only allow-listed reporters; stale reports rejected; 14 keyless EVM tests</li>
+</ul>
+<p class="k" style="font-size:18px">Testnet deployment: contract address and tx hash added after deployment</p>
+<div class="foot">potwatch</div></div>
+
+<div class="s"><h2>Why Portaldot, and what comes next</h2>
+<div class="cols"><div><p><b>Why Portaldot</b></p><ul>
+<li>V3 combines Substrate consensus with an EVM. potwatch watches both, and uses the EVM to make the results verifiable.</li>
+<li>Small validator sets make early warning especially valuable right now.</li>
+</ul></div><div><p><b>Roadmap</b></p><ul>
+<li>Hosted public status page plus periodic on-chain attestations</li>
+<li>Per-operator view: authored blocks, missed slots, GRANDPA participation</li>
+<li>Alerts by webhook, Discord or Telegram</li>
+<li>WASM (ink!) version of the attestation contract</li>
+</ul></div></div><div class="foot">MIT licensed · open source</div></div>
+</body></html>
