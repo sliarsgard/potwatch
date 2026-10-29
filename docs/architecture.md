@@ -35,7 +35,7 @@ flowchart TB
   Obs["Prometheus / cron / CI<br/>exit code 0·1·2"] --- O
 ```
 
-Rendered: [architecture.svg](architecture.svg) · [architecture.png](architecture.png) (source: `architecture.mmd`).
+The diagram is also available as [SVG](architecture.svg) and [PNG](architecture.png). Its source is `architecture.mmd`.
 
 ## Data flow
 
